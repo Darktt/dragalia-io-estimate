@@ -3,18 +3,21 @@ package Items;
 import java.util.*;
 import java.util.stream.IntStream;
 
-public abstract class BackPackBase implements Comparable {
+public abstract class BackPackBase implements Comparable 
+{
     protected Map<ItemExchange, Integer> exchangeRecord;
     private int simulatedPlayed;
 
-    BackPackBase(Map<ItemExchange, Integer> exchangeRecord, int simulatedPlayed) {
+    BackPackBase(Map<ItemExchange, Integer> exchangeRecord, int simulatedPlayed) 
+    {
         this.exchangeRecord = exchangeRecord;
         this.simulatedPlayed = simulatedPlayed;
     }
 
     abstract BackPackBase deepCopy();
 
-    public void playGames(int games) {
+    public void playGames(int games) 
+    {
         simulatedPlayed += games;
         playGamesAccumulate(games);
     }
@@ -23,41 +26,51 @@ public abstract class BackPackBase implements Comparable {
 
     abstract BaseItem getItemViaCode(int code);
 
-    public int gamesToComplete() {
+    public int gamesToComplete() 
+    {
         return gamesToComplete(false);
     }
 
-    public int gamesToComplete(boolean includingSimulated) {
+    public int gamesToComplete(boolean includingSimulated) 
+    {
         OptionalInt s = IntStream.range(1, getItemTypesCount() + 1).map(x -> this.getItemViaCode(x).gamesLeft()).max();
 
         if (s.isPresent()) {
+
             int ret = s.getAsInt();
+
             if (includingSimulated) {
                 ret += simulatedPlayed;
             }
+
             return ret;
         } else {
+
             throw new IllegalArgumentException();
         }
     }
 
     abstract int[][] getItemCombinationsByCode();
 
-    public int getSimulatedPlayed() {
+    public int getSimulatedPlayed() 
+    {
         return simulatedPlayed;
     }
 
-    public HashSet<BackPackBase> getExchangeOncePossibilities() {
+    public HashSet<BackPackBase> getExchangeOncePossibilities() 
+    {
         HashSet<BackPackBase> ret = new HashSet<>();
 
         int[][] combinations = getItemCombinationsByCode();
 
         for (int[] cmb : combinations) {
+
             int srcCode = cmb[0];
             int destCode = cmb[1];
 
             BackPackBase newPack = this.deepCopy();
             try {
+
                 BaseItem srcItem = newPack.getItemViaCode(srcCode);
                 BaseItem destItem = newPack.getItemViaCode(destCode);
 
@@ -81,12 +94,17 @@ public abstract class BackPackBase implements Comparable {
                 if (newPack.gamesToComplete() < this.gamesToComplete()) {
                     ret.add(newPack);
                 }
-            } catch (IndexOutOfBoundsException | UnexchangeableException ignored) { }
+
+            } catch (IndexOutOfBoundsException | UnexchangeableException ignored) {
+
+                // ignore exception.
+            }
         }
         return ret;
     }
 
-    public Map<ItemExchange, Integer> getExchangeRecord() {
+    public Map<ItemExchange, Integer> getExchangeRecord() 
+    {
         return exchangeRecord;
     }
 
@@ -94,7 +112,8 @@ public abstract class BackPackBase implements Comparable {
 
     abstract String getPrintStatusFmt();
 
-    public void printStatus() {
+    public void printStatus() 
+    {
         StringBuilder nums = new StringBuilder();
         StringBuilder games = new StringBuilder();
 
@@ -116,7 +135,8 @@ public abstract class BackPackBase implements Comparable {
                         nums.toString(), this.getSimulatedPlayed(), games.toString(), exchangeRecord));
     }
 
-    public boolean equals(Object obj) {
+    public boolean equals(Object obj) 
+    {
         if (obj instanceof BackPackBase) {
             BackPackBase bp = (BackPackBase)obj;
             return IntStream.range(1, getItemTypesCount() + 1).allMatch(x -> this.getItemViaCode(x).getCurrent() == bp.getItemViaCode(x).getCurrent());
@@ -126,7 +146,8 @@ public abstract class BackPackBase implements Comparable {
     }
 
     @Override
-    public int compareTo(Object o) {
+    public int compareTo(Object o) 
+    {
         if (o instanceof BackPackBase) {
             BackPackBase bp = (BackPackBase)o;
             return this.gamesToComplete() - bp.gamesToComplete();
@@ -136,7 +157,8 @@ public abstract class BackPackBase implements Comparable {
     }
 
     @Override
-    public String toString() {
+    public String toString() 
+    {
         return String.format("%s - %d games left", this.getClass().getName(), this.gamesToComplete());
     }
 }
